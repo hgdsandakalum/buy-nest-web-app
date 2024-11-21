@@ -4,14 +4,9 @@
 import "./globals.css";
 import { ConfigProvider } from "antd";
 import Loader from "../components/Loader";
-import { useAppStore } from "@component/store";
+import { useAppStore, useAuthStore } from "@component/store";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-
-// export const metadata: Metadata = {
-//   title: "BuyNest",
-//   description: "Where Smart Shopping Begins",
-// };
 
 export default function RootLayout({
   children,

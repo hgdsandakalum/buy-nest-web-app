@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Space,
@@ -15,11 +16,14 @@ import {
   AppstoreOutlined,
   DatabaseOutlined,
   CodeSandboxOutlined,
+  TeamOutlined,
+  ShoppingCartOutlined,
+  CommentOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import Image from "next/image";
 import buynestLogo from "../../public/images/buynest_logo.png";
-import { useAppStore } from "@component/store";
+import { useAppStore, useAuthStore } from "@component/store";
 
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -28,38 +32,6 @@ type MenuItem = Required<MenuProps>["items"][number];
 interface DefaultLayoutProps {
   children: React.ReactNode;
 }
-
-const handleMenuClick: MenuProps["onClick"] = (e) => {
-  message.info("Click on menu item.");
-  console.log("click", e);
-};
-
-const items: MenuProps["items"] = [
-  {
-    label: "1st menu item",
-    key: "1",
-  },
-  {
-    label: "2nd menu item",
-    key: "2",
-  },
-  {
-    label: "3rd menu item",
-    key: "3",
-    danger: true,
-  },
-  {
-    label: "4rd menu item",
-    key: "4",
-    danger: true,
-    disabled: true,
-  },
-];
-
-const menuProps = {
-  items,
-  onClick: handleMenuClick,
-};
 
 const menuitems: MenuItem[] = [
   {
@@ -73,29 +45,62 @@ const menuitems: MenuItem[] = [
     icon: <CodeSandboxOutlined />,
   },
   {
-    key: "sub1",
-    label: "Categories",
+    key: "/vendor",
+    label: "All Vendors",
+    icon: <TeamOutlined />,
+  },
+  {
+    key: "/inventory",
+    label: "All Inventories",
     icon: <DatabaseOutlined />,
-    children: [
-      { key: "5", label: "Option 5" },
-      { key: "6", label: "Option 6" },
-      {
-        key: "sub3",
-        label: "Submenu",
-        children: [
-          { key: "7", label: "Option 7" },
-          { key: "8", label: "Option 8" },
-        ],
-      },
-    ],
+  },
+  {
+    key: "/orders",
+    label: "All Orders",
+    icon: <ShoppingCartOutlined />,
   },
 ];
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const router = useRouter();
   const { pageName, setIsLoadingAction } = useAppStore();
+  const { checkAuth, user, logout } = useAuthStore();
+  const userRole = localStorage.getItem("userRole");
 
-  console.log("pageName", pageName);
+  useEffect(() => {
+    const verifyAuth = async () => {
+      const isAuthenticated = await checkAuth();
+      if (!isAuthenticated) {
+        router.push("/");
+      } else {
+        console.log("user data", user);
+      }
+    };
+    verifyAuth();
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  const handleMenuClick: MenuProps["onClick"] = (e) => {
+    if (e.key == "2") {
+      handleLogout();
+    }
+  };
+
+  const items: MenuProps["items"] = [
+    {
+      label: "Logout",
+      key: "2",
+    },
+  ];
+
+  const menuProps = {
+    items,
+    onClick: handleMenuClick,
+  };
 
   const onClick: MenuProps["onClick"] = (e) => {
     setIsLoadingAction(true);
@@ -103,6 +108,56 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     router.push(`${e.key}`);
     setIsLoadingAction(false);
   };
+
+  const menuitems: MenuItem[] = useMemo(
+    () => [
+      {
+        key: "/dashboard",
+        label: "Dashboard",
+        icon: <AppstoreOutlined />,
+      },
+      ...(userRole !== "CSR"
+        ? [
+            {
+              key: "/vendor/products",
+              label: "All Products",
+              icon: <CodeSandboxOutlined />,
+            },
+          ]
+        : []),
+
+      ...(userRole !== "VENDOR"
+        ? [
+            {
+              key: "/vendor",
+              label: "All Vendors",
+              icon: <TeamOutlined />,
+            },
+          ]
+        : []),
+      {
+        key: "/inventory",
+        label: "All Inventories",
+        icon: <DatabaseOutlined />,
+      },
+      {
+        key: "/orders",
+        label: "All Orders",
+        icon: <ShoppingCartOutlined />,
+      },
+      ...(userRole === "VENDOR"
+        ? [
+            {
+              key: "/comments",
+              label: "All Comments",
+              icon: <CommentOutlined />,
+            },
+          ]
+        : []),
+    ],
+    [userRole]
+  );
+
   return (
     <ConfigProvider
       theme={{
@@ -125,7 +180,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             >
               <Button size="large" className="font-semibold ">
                 <Space>
-                  Admin
+                  {user?.role}
                   <DownOutlined />
                 </Space>
               </Button>

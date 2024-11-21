@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.buynest.fragments.HomeFragment"
+        android:label="Home">
+        <action
+            android:id="@+id/action_homeFragment_to_productDetailFragment"
+            app:destination="@id/product_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_categories"
+        android:name="com.example.buynest.fragments.CategoriesFragment"
+        android:label="Categories" />
+
+    <fragment
+        android:id="@+id/navigation_cart"
+        android:name="com.example.buynest.fragments.CartFragment"
+        android:label="Cart" />
+
+    <fragment
+        android:id="@+id/navigation_orders"
+        android:name="com.example.buynest.fragments.OrdersFragment"
+        android:label="Orders" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.buynest.fragments.ProfileFragment"
+        android:label="Profile" />
+
+    <fragment
+        android:id="@+id/product_detail"
+        android:name="com.example.buynest.fragments.ProductDetailFragment"
+        android:label="ProductDetail">
+        <argument
+            android:name="product"
+            app:argType="com.example.buynest.models.Product" />
+        <action
+            android:id="@+id/action_productDetailFragment_to_cartFragment"
+            app:destination="@id/navigation_cart" />
+    </fragment>
+
+</navigation>
